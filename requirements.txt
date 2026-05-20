@@ -1,0 +1,20 @@
+# Image processing
+opencv-python>=4.9
+Pillow>=10.0
+
+# Geometry
+shapely>=2.0
+numpy>=1.26
+
+# IDF export
+eppy>=0.5.63
+
+# HPXML export
+lxml>=5.0
+
+# CLI
+click>=8.1
+
+# Dev / test
+pytest>=8.0
+pytest-cov>=5.0
