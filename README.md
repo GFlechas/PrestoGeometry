@@ -6,7 +6,7 @@ PrestoGeometry converts photos taken while walking around a building into repres
 
 ## What it does
 
-1. **Ingest** — upload a set of photos taken around a building exterior (and optionally interior)
+1. **Ingest** — upload a set of photos taken around a building exterior
 2. **Reconstruct** — extract facade geometry, window/door openings, and floor counts using computer vision and photogrammetry
 3. **Export** — write the resulting geometry to:
    - `.idf` (EnergyPlus)
@@ -43,17 +43,6 @@ pip install -r requirements.txt
 # run on a folder of building photos
 python -m presto_geometry --input data/samples/my_building --output data/outputs/
 ```
-
-## Tech stack
-
-| Concern | Library |
-|---|---|
-| Image processing | OpenCV, Pillow |
-| Geometry | Shapely, NumPy |
-| Photogrammetry / depth | Open3D (optional) |
-| IDF export | eppy / geomeppy |
-| OSM export | openstudio (Python bindings) |
-| HPXML export | lxml |
 
 ## License
 
