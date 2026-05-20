@@ -5,6 +5,8 @@ Pillow>=10.0
 # Geometry
 shapely>=2.0
 numpy>=1.26
+scipy>=1.11
+scikit-learn>=1.3
 
 # IDF export
 eppy>=0.5.63
@@ -15,9 +17,22 @@ lxml>=5.0
 # CLI
 click>=8.1
 
+# Web server
+flask>=3.0
+
 # Schema validation
 jsonschema>=4.23
 
 # Dev / test
 pytest>=8.0
 pytest-cov>=5.0
+
+# Optional: DUSt3R pose extraction (install via `pip install -e .[dust3r]`).
+# You must also clone https://github.com/naver/dust3r so its `dust3r` package
+# is importable.
+# torch
+# torchvision
+# tqdm
+# einops
+# roma
+# huggingface_hub

@@ -29,4 +29,12 @@ Thumbs.db
 
 # Project outputs
 data/outputs/
+data/floorplans/
 *.idf.bak
+
+# Frontend build artefacts
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+presto_geometry/web/static/assets/
+presto_geometry/web/static/index.html
