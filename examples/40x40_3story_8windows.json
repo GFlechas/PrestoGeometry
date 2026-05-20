@@ -1,0 +1,363 @@
+{
+  "version": "0.7.0",
+  "application": {},
+  "project": {
+    "config": {
+      "units": "ip",
+      "language": "EN-US"
+    },
+    "north_axis": 0,
+    "ground": {
+      "floor_offset": 0,
+      "azimuth_angle": 0,
+      "tilt_slope": 0
+    },
+    "grid": {
+      "visible": true,
+      "spacing": 5
+    },
+    "view": {
+      "min_x": -10,
+      "min_y": -10,
+      "max_x": 50,
+      "max_y": 50
+    },
+    "map": {
+      "visible": false,
+      "latitude": null,
+      "longitude": null,
+      "zoom": null,
+      "elevation": null,
+      "enabled": false,
+      "initialized": false,
+      "rotation": 0
+    },
+    "previous_story": {
+      "visible": true
+    },
+    "show_import_export": true
+  },
+  "stories": [
+    {
+      "id": "story-1",
+      "handle": null,
+      "name": "Floor 1",
+      "image_visible": true,
+      "below_floor_plenum_height": 0,
+      "floor_to_ceiling_height": 10,
+      "above_ceiling_plenum_height": 0,
+      "multiplier": 1,
+      "color": "#D4E8C2",
+      "geometry": {
+        "id": "geom-1",
+        "vertices": [
+          { "id": "v1-sw", "x":  0, "y":  0, "edge_ids": ["e1-south", "e4-west"] },
+          { "id": "v1-se", "x": 40, "y":  0, "edge_ids": ["e1-south", "e2-east"] },
+          { "id": "v1-ne", "x": 40, "y": 40, "edge_ids": ["e2-east",  "e3-north"] },
+          { "id": "v1-nw", "x":  0, "y": 40, "edge_ids": ["e3-north", "e4-west"] }
+        ],
+        "edges": [
+          { "id": "e1-south", "vertex_ids": ["v1-sw", "v1-se"], "face_ids": ["f1"] },
+          { "id": "e2-east",  "vertex_ids": ["v1-se", "v1-ne"], "face_ids": ["f1"] },
+          { "id": "e3-north", "vertex_ids": ["v1-ne", "v1-nw"], "face_ids": ["f1"] },
+          { "id": "e4-west",  "vertex_ids": ["v1-nw", "v1-sw"], "face_ids": ["f1"] }
+        ],
+        "faces": [
+          {
+            "id": "f1",
+            "edge_ids": ["e1-south", "e2-east", "e3-north", "e4-west"],
+            "edge_order": [0, 0, 0, 0]
+          }
+        ]
+      },
+      "images": [],
+      "spaces": [
+        {
+          "id": "space-1",
+          "handle": null,
+          "name": "Floor 1 Space",
+          "face_id": "f1",
+          "building_unit_id": null,
+          "thermal_zone_id": "tz-1",
+          "space_type_id": "stype-1",
+          "construction_set_id": null,
+          "pitched_roof_id": null,
+          "daylighting_controls": [],
+          "below_floor_plenum_height": null,
+          "floor_to_ceiling_height": null,
+          "above_ceiling_plenum_height": null,
+          "floor_offset": null,
+          "open_to_below": false,
+          "building_type_id": null,
+          "template": null
+        }
+      ],
+      "shading": [],
+      "windows": [
+        { "window_definition_id": "wdef-1", "edge_id": "e1-south", "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e1-south", "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e1-south", "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e1-south", "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e1-south", "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e1-south", "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e1-south", "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e1-south", "alpha": 0.9375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.9375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.9375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e4-west",  "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e4-west",  "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e4-west",  "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e4-west",  "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e4-west",  "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e4-west",  "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e4-west",  "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e4-west",  "alpha": 0.9375 }
+      ],
+      "doors": []
+    },
+    {
+      "id": "story-2",
+      "handle": null,
+      "name": "Floor 2",
+      "image_visible": true,
+      "below_floor_plenum_height": 0,
+      "floor_to_ceiling_height": 10,
+      "above_ceiling_plenum_height": 0,
+      "multiplier": 1,
+      "color": "#C2D4E8",
+      "geometry": {
+        "id": "geom-2",
+        "vertices": [
+          { "id": "v2-sw", "x":  0, "y":  0, "edge_ids": ["e2-south", "e2-west"] },
+          { "id": "v2-se", "x": 40, "y":  0, "edge_ids": ["e2-south", "e2-east"] },
+          { "id": "v2-ne", "x": 40, "y": 40, "edge_ids": ["e2-east",  "e2-north"] },
+          { "id": "v2-nw", "x":  0, "y": 40, "edge_ids": ["e2-north", "e2-west"] }
+        ],
+        "edges": [
+          { "id": "e2-south", "vertex_ids": ["v2-sw", "v2-se"], "face_ids": ["f2"] },
+          { "id": "e2-east",  "vertex_ids": ["v2-se", "v2-ne"], "face_ids": ["f2"] },
+          { "id": "e2-north", "vertex_ids": ["v2-ne", "v2-nw"], "face_ids": ["f2"] },
+          { "id": "e2-west",  "vertex_ids": ["v2-nw", "v2-sw"], "face_ids": ["f2"] }
+        ],
+        "faces": [
+          {
+            "id": "f2",
+            "edge_ids": ["e2-south", "e2-east", "e2-north", "e2-west"],
+            "edge_order": [0, 0, 0, 0]
+          }
+        ]
+      },
+      "images": [],
+      "spaces": [
+        {
+          "id": "space-2",
+          "handle": null,
+          "name": "Floor 2 Space",
+          "face_id": "f2",
+          "building_unit_id": null,
+          "thermal_zone_id": "tz-2",
+          "space_type_id": "stype-1",
+          "construction_set_id": null,
+          "pitched_roof_id": null,
+          "daylighting_controls": [],
+          "below_floor_plenum_height": null,
+          "floor_to_ceiling_height": null,
+          "above_ceiling_plenum_height": null,
+          "floor_offset": null,
+          "open_to_below": false,
+          "building_type_id": null,
+          "template": null
+        }
+      ],
+      "shading": [],
+      "windows": [
+        { "window_definition_id": "wdef-1", "edge_id": "e2-south", "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-south", "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-south", "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-south", "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-south", "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-south", "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-south", "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-south", "alpha": 0.9375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-east",  "alpha": 0.9375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-north", "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-north", "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-north", "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-north", "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-north", "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-north", "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-north", "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-north", "alpha": 0.9375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-west",  "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-west",  "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-west",  "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-west",  "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-west",  "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-west",  "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-west",  "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e2-west",  "alpha": 0.9375 }
+      ],
+      "doors": []
+    },
+    {
+      "id": "story-3",
+      "handle": null,
+      "name": "Floor 3",
+      "image_visible": true,
+      "below_floor_plenum_height": 0,
+      "floor_to_ceiling_height": 10,
+      "above_ceiling_plenum_height": 0,
+      "multiplier": 1,
+      "color": "#E8C2D4",
+      "geometry": {
+        "id": "geom-3",
+        "vertices": [
+          { "id": "v3-sw", "x":  0, "y":  0, "edge_ids": ["e3-south", "e3-west"] },
+          { "id": "v3-se", "x": 40, "y":  0, "edge_ids": ["e3-south", "e3-east"] },
+          { "id": "v3-ne", "x": 40, "y": 40, "edge_ids": ["e3-east",  "e3-north"] },
+          { "id": "v3-nw", "x":  0, "y": 40, "edge_ids": ["e3-north", "e3-west"] }
+        ],
+        "edges": [
+          { "id": "e3-south", "vertex_ids": ["v3-sw", "v3-se"], "face_ids": ["f3"] },
+          { "id": "e3-east",  "vertex_ids": ["v3-se", "v3-ne"], "face_ids": ["f3"] },
+          { "id": "e3-north", "vertex_ids": ["v3-ne", "v3-nw"], "face_ids": ["f3"] },
+          { "id": "e3-west",  "vertex_ids": ["v3-nw", "v3-sw"], "face_ids": ["f3"] }
+        ],
+        "faces": [
+          {
+            "id": "f3",
+            "edge_ids": ["e3-south", "e3-east", "e3-north", "e3-west"],
+            "edge_order": [0, 0, 0, 0]
+          }
+        ]
+      },
+      "images": [],
+      "spaces": [
+        {
+          "id": "space-3",
+          "handle": null,
+          "name": "Floor 3 Space",
+          "face_id": "f3",
+          "building_unit_id": null,
+          "thermal_zone_id": "tz-3",
+          "space_type_id": "stype-1",
+          "construction_set_id": null,
+          "pitched_roof_id": null,
+          "daylighting_controls": [],
+          "below_floor_plenum_height": null,
+          "floor_to_ceiling_height": null,
+          "above_ceiling_plenum_height": null,
+          "floor_offset": null,
+          "open_to_below": false,
+          "building_type_id": null,
+          "template": null
+        }
+      ],
+      "shading": [],
+      "windows": [
+        { "window_definition_id": "wdef-1", "edge_id": "e3-south", "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-south", "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-south", "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-south", "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-south", "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-south", "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-south", "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-south", "alpha": 0.9375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-east",  "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-east",  "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-east",  "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-east",  "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-east",  "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-east",  "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-east",  "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-east",  "alpha": 0.9375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-north", "alpha": 0.9375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-west",  "alpha": 0.0625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-west",  "alpha": 0.1875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-west",  "alpha": 0.3125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-west",  "alpha": 0.4375 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-west",  "alpha": 0.5625 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-west",  "alpha": 0.6875 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-west",  "alpha": 0.8125 },
+        { "window_definition_id": "wdef-1", "edge_id": "e3-west",  "alpha": 0.9375 }
+      ],
+      "doors": []
+    }
+  ],
+  "building_units": [],
+  "thermal_zones": [
+    {
+      "id": "tz-1",
+      "handle": null,
+      "name": "Thermal Zone Floor 1",
+      "color": "#D4E8C2"
+    },
+    {
+      "id": "tz-2",
+      "handle": null,
+      "name": "Thermal Zone Floor 2",
+      "color": "#C2D4E8"
+    },
+    {
+      "id": "tz-3",
+      "handle": null,
+      "name": "Thermal Zone Floor 3",
+      "color": "#E8C2D4"
+    }
+  ],
+  "space_types": [
+    {
+      "id": "stype-1",
+      "handle": null,
+      "name": "Office - Open Office",
+      "color": "#78E6C7"
+    }
+  ],
+  "construction_sets": [],
+  "window_definitions": [
+    {
+      "id": "wdef-1",
+      "name": "Standard Window 3x4",
+      "window_definition_mode": "Single Window",
+      "wwr": null,
+      "sill_height": 3,
+      "window_spacing": null,
+      "height": 4,
+      "width": 3,
+      "window_type": "Fixed",
+      "overhang_projection_factor": null,
+      "fin_projection_factor": null
+    }
+  ],
+  "door_definitions": [],
+  "daylighting_control_definitions": [],
+  "pitched_roofs": []
+}

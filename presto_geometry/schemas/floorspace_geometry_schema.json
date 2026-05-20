@@ -1,0 +1,1192 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"_source": "https://github.com/NatLabRockies/floorspace.js/blob/develop/schema/geometry_schema.json",
+	"_source_commit": "b2aad6c81cd7e276d84bf89339e9729cac391381",
+	"_vendored": "2026-05-20",
+	"version": "0.7.0",
+	"description": "FloorspaceJS geometry schema — vendored copy. See _source for upstream.",
+	"type": "object",
+	"properties": {
+		"version": {
+			"description": "File format version",
+			"type": "string"
+		},
+		"application": {
+			"$ref": "#/definitions/Application"
+		},
+		"project": {
+			"$ref": "#/definitions/Project"
+		},
+		"stories": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/Story"
+			}
+		},
+		"building_units": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/BuildingUnit"
+			}
+		},
+		"thermal_zones": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/ThermalZone"
+			}
+		},
+		"space_types": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/SpaceType"
+			}
+		},
+		"construction_sets": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/ConstructionSet"
+			}
+		},
+		"window_definitions": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/WindowDefinition"
+			}
+		},
+		"door_definitions": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/DoorDefinition"
+			}
+		},
+		"daylighting_control_definitions": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/DaylightingControlDefinition"
+			}
+		},
+		"pitched_roofs": {
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/PitchedRoof"
+			}
+		}
+	},
+	"required": [
+		"version",
+		"application",
+		"project",
+		"stories",
+		"building_units",
+		"thermal_zones",
+		"space_types",
+		"construction_sets",
+		"window_definitions",
+		"door_definitions",
+		"daylighting_control_definitions",
+		"pitched_roofs"
+	],
+	"definitions": {
+		"Application": {
+			"description": "Reserved for application data, not for external use",
+			"type": "object"
+		},
+		"Project": {
+			"description": "Information that applies to the entire project",
+			"type": "object",
+			"properties": {
+				"config": {
+					"type": "object",
+					"properties": {
+						"units": {
+							"type": [
+								"string",
+								"null"
+							],
+							"enum": [
+								"ip",
+								"si"
+							],
+							"default": "ip"
+						},
+						"language": {
+							"type": [
+								"string",
+								"null"
+							],
+							"default": "EN-US"
+						}
+					},
+					"required": [
+						"units",
+						"language"
+					]
+				},
+				"north_axis": {
+					"description": "Angle between building north and true north in degrees (clockwise is positive)",
+					"type": [
+						"number",
+						"null"
+					],
+					"default": 0,
+					"si_units": "deg",
+					"ip_units": "deg"
+				},
+				"ground": {
+					"type": "object",
+					"properties": {
+						"floor_offset": {
+							"description": "Specifies the vertical offset between the building floor and the ground plane. Use a value < 0 for buildings with below-grade spaces, or a value > 0 for, e.g., buildings on piers.",
+							"type": [
+								"number",
+								"null"
+							],
+							"default": 0,
+							"si_units": "m",
+							"ip_units": "ft"
+						},
+						"azimuth_angle": {
+							"description": "Direction of the ground plane, in clockwise degrees from the positive y-axis when viewed from above.",
+							"type": [
+								"number",
+								"null"
+							],
+							"default": 0,
+							"si_units": "deg",
+							"ip_units": "deg"
+						},
+						"tilt_slope": {
+							"description": "Slope of the ground plane from horizontal. For example, a value of 1 implies a 45-deg angle.",
+							"type": [
+								"number",
+								"null"
+							],
+							"default": 0
+						}
+					},
+					"required": [
+						"floor_offset",
+						"azimuth_angle",
+						"tilt_slope"
+					]
+				},
+				"grid": {
+					"type": "object",
+					"properties": {
+						"visible": {
+							"type": [
+								"boolean",
+								"null"
+							]
+						},
+						"spacing": {
+							"type": [
+								"number",
+								"null"
+							],
+							"si_units": "m",
+							"ip_units": "ft"
+						}
+					},
+					"required": [
+						"visible",
+						"spacing"
+					]
+				},
+				"view": {
+					"type": "object",
+					"properties": {
+						"min_x": {
+							"type": [
+								"number",
+								"null"
+							],
+							"si_units": "m",
+							"ip_units": "ft"
+						},
+						"min_y": {
+							"type": [
+								"number",
+								"null"
+							],
+							"si_units": "m",
+							"ip_units": "ft"
+						},
+						"max_x": {
+							"type": [
+								"number",
+								"null"
+							],
+							"si_units": "m",
+							"ip_units": "ft"
+						},
+						"max_y": {
+							"type": [
+								"number",
+								"null"
+							],
+							"si_units": "m",
+							"ip_units": "ft"
+						}
+					},
+					"required": [
+						"min_x",
+						"min_y",
+						"max_x",
+						"max_y"
+					]
+				},
+				"map": {
+					"type": "object",
+					"properties": {
+						"visible": {
+							"type": [
+								"boolean",
+								"null"
+							]
+						},
+						"latitude": {
+							"type": [
+								"number",
+								"null"
+							]
+						},
+						"longitude": {
+							"type": [
+								"number",
+								"null"
+							]
+						},
+						"zoom": {
+							"type": [
+								"number",
+								"null"
+							]
+						},
+						"elevation": {
+							"type": [
+								"number",
+								"null"
+							],
+							"si_units": "m",
+							"ip_units": "ft"
+						},
+						"enabled": {
+							"type": [
+								"boolean",
+								"null"
+							]
+						},
+						"initialized": {
+							"type": [
+								"boolean",
+								"null"
+							]
+						},
+						"rotation": {
+							"type": [
+								"number",
+								"null"
+							],
+							"si_units": "deg",
+							"ip_units": "deg"
+						}
+					},
+					"required": [
+						"visible",
+						"latitude",
+						"longitude",
+						"zoom",
+						"elevation",
+						"enabled",
+						"initialized",
+						"rotation"
+					]
+				},
+				"previous_story": {
+					"type": "object",
+					"properties": {
+						"visible": {
+							"type": [
+								"boolean",
+								"null"
+							]
+						}
+					},
+					"required": [
+						"visible"
+					]
+				},
+				"show_import_export": {
+					"type": [
+						"boolean",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"config",
+				"north_axis",
+				"ground",
+				"grid",
+				"view",
+				"map",
+				"previous_story",
+				"show_import_export"
+			]
+		},
+		"Geometry": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"vertices": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Vertex"
+					}
+				},
+				"edges": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Edge"
+					}
+				},
+				"faces": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Face"
+					}
+				}
+			},
+			"required": [
+				"id",
+				"vertices",
+				"edges",
+				"faces"
+			]
+		},
+		"Vertex": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"x": {
+					"type": "number",
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"y": {
+					"type": "number",
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"edge_ids": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"id",
+				"x",
+				"y",
+				"edge_ids"
+			]
+		},
+		"Edge": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"vertex_ids": {
+					"type": "array",
+					"minItems": 2,
+					"maxItems": 2,
+					"uniqueItems": true,
+					"items": {
+						"type": "string"
+					}
+				},
+				"face_ids": {
+					"type": "array",
+					"minItems": 1,
+					"maxItems": 2,
+					"items": {
+						"type": "string"
+					}
+				}
+			},
+			"required": [
+				"id",
+				"vertex_ids",
+				"face_ids"
+			]
+		},
+		"Face": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"edge_ids": {
+					"type": "array",
+					"minItems": 3,
+					"items": {
+						"type": "string"
+					}
+				},
+				"edge_order": {
+					"type": "array",
+					"minItems": 3,
+					"items": {
+						"type": "number",
+						"enum": [
+							0,
+							1
+						]
+					}
+				}
+			},
+			"required": [
+				"id",
+				"edge_ids",
+				"edge_order"
+			]
+		},
+		"Story": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"handle": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"image_visible": {
+					"type": [
+						"boolean",
+						"null"
+					],
+					"default": true
+				},
+				"below_floor_plenum_height": {
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"default": 0,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"floor_to_ceiling_height": {
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"default": 8,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"above_ceiling_plenum_height": {
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"default": 0,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"multiplier": {
+					"type": [
+						"integer",
+						"null"
+					],
+					"minimum": 1,
+					"multipleOf": 1,
+					"default": 1
+				},
+				"color": {
+					"$ref": "#/definitions/HexColor"
+				},
+				"geometry": {
+					"$ref": "#/definitions/Geometry"
+				},
+				"images": {
+					"type": "array"
+				},
+				"spaces": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Space"
+					}
+				},
+				"shading": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Shading"
+					}
+				},
+				"windows": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"window_definition_id": {
+								"type": "string"
+							},
+							"edge_id": {
+								"type": "string"
+							},
+							"alpha": {
+								"description": "Distance along edge to center point of window, starting from first vertex of edge at a = 0 and ending at second vertex of edge at a =1.  v = v1 + a*(v2-v1).  Does not apply if window_definition_mode is \"Window to Wall Ratio\". Will be an array of such values if window_definition_mode is \"Repeating Windows\".",
+								"type": [
+									"array",
+									"number",
+									"null"
+								],
+								"minimum": 0,
+								"maximum": 1,
+								"items": {
+									"type": "number",
+									"minimum": 0,
+									"maximum": 1
+								}
+							}
+						},
+						"required": [
+							"window_definition_id",
+							"edge_id",
+							"alpha"
+						]
+					}
+				},
+				"doors": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"door_definition_id": {
+								"type": "string"
+							},
+							"edge_id": {
+								"type": "string"
+							},
+							"alpha": {
+								"description": "Distance along edge to center point of door, starting from first vertex of edge at a = 0 and ending at second vertex of edge at a =1.  v = v1 + a*(v2-v1). ",
+								"type": "number",
+								"minimum": 0,
+								"maximum": 1
+							}
+						},
+						"required": [
+							"door_definition_id",
+							"edge_id",
+							"alpha"
+						]
+					}
+				}
+			},
+			"required": [
+				"id",
+				"handle",
+				"name",
+				"image_visible",
+				"below_floor_plenum_height",
+				"floor_to_ceiling_height",
+				"above_ceiling_plenum_height",
+				"multiplier",
+				"color",
+				"geometry",
+				"images",
+				"spaces",
+				"shading",
+				"windows",
+				"doors"
+			]
+		},
+		"Space": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"handle": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"face_id": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"building_unit_id": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"thermal_zone_id": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"space_type_id": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"construction_set_id": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"pitched_roof_id": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"daylighting_controls": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"daylighting_control_definition_id": {
+								"type": "string"
+							},
+							"vertex_id": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"daylighting_control_definition_id",
+							"vertex_id"
+						]
+					}
+				},
+				"below_floor_plenum_height": {
+					"description": "If provided, overrides the story below_floor_plenum_height.",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"floor_to_ceiling_height": {
+					"description": "If provided, overrides the story floor_to_ceiling_height.",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"above_ceiling_plenum_height": {
+					"description": "If provided, overrides the story above_ceiling_plenum_height.",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"floor_offset": {
+					"description": "If provided, specifies the vertical offset between the space floor and the story floor.",
+					"type": [
+						"number",
+						"null"
+					],
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"open_to_below": {
+					"description": "If true, defines a space that is open to below (has no floor).",
+					"type": [
+						"boolean",
+						"null"
+					]
+				},
+				"building_type_id": {
+					"description": "Standard space type",
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"template": {
+					"description": "Template for the space to follow",
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"id",
+				"handle",
+				"name",
+				"face_id",
+				"building_unit_id",
+				"thermal_zone_id",
+				"space_type_id",
+				"construction_set_id",
+				"pitched_roof_id",
+				"daylighting_controls",
+				"below_floor_plenum_height",
+				"floor_to_ceiling_height",
+				"above_ceiling_plenum_height",
+				"floor_offset",
+				"open_to_below",
+				"building_type_id",
+				"template"
+			]
+		},
+		"Shading": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"handle": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"face_id": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"id",
+				"handle",
+				"name",
+				"face_id"
+			]
+		},
+		"ThermalZone": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"handle": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"color": {
+					"$ref": "#/definitions/HexColor"
+				}
+			},
+			"required": [
+				"id",
+				"handle",
+				"name",
+				"color"
+			]
+		},
+		"SpaceType": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"handle": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"color": {
+					"$ref": "#/definitions/HexColor"
+				}
+			},
+			"required": [
+				"id",
+				"handle",
+				"name",
+				"color"
+			]
+		},
+		"BuildingUnit": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"handle": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"color": {
+					"$ref": "#/definitions/HexColor"
+				}
+			},
+			"required": [
+				"id",
+				"handle",
+				"name",
+				"color"
+			]
+		},
+		"ConstructionSet": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"handle": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				}
+			},
+			"required": [
+				"id",
+				"handle",
+				"name"
+			]
+		},
+		"WindowDefinition": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"window_definition_mode": {
+					"type": "string",
+					"enum": [
+						"Single Window",
+						"Repeating Windows",
+						"Window to Wall Ratio"
+					],
+					"default": "Single Window"
+				},
+				"wwr": {
+					"description": "Target window to wall ratio, only used if window_definition_mode is \"Window to Wall Ratio\"",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"maximum": 1,
+					"exclusiveMaximum": true,
+					"default": 0.2
+				},
+				"sill_height": {
+					"description": "Vertical distance from the floor to the window sill. In drawing units.",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 3,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"window_spacing": {
+					"description": "Spacing between windows.  Only used if window_definition_mode is  \"Repeating Windows\".",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 4,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"height": {
+					"description": "Vertical height of each window. In drawing units. Used if window_definition_mode is \"Single Window\" or \"Repeating Windows\".",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 4,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"width": {
+					"description": "Horizontal width of each window. In drawing units. Used if window_definition_mode is \"Single Window\" or \"Repeating Windows\".",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 2,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"window_type": {
+					"type": "string",
+					"enum": [
+						"Fixed",
+						"Operable"
+					],
+					"default": "Fixed"
+				},
+				"overhang_projection_factor": {
+					"description": "Projection factor for overhangs, set to null for no overhang.  Overhang depth = overhang_projection_factor*height.",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": null
+				},
+				"fin_projection_factor": {
+					"description": "Projection factor for fins, set to null for no overhang. Projection factor for overhangs, set to null for no overhang.  Fin depth = fin_projection_factor*height.",
+					"type": [
+						"number",
+						"null"
+					],
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": null
+				},
+				"texture": {
+					"description": "Internal attribute representing how this window group is displayed. Applies only if window_definition_mode is \"Window to Wall Ratio\".",
+					"type": [
+						"string",
+						"null"
+					],
+					"default": null
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"window_definition_mode",
+				"wwr",
+				"sill_height",
+				"window_spacing",
+				"height",
+				"width",
+				"window_type",
+				"overhang_projection_factor",
+				"fin_projection_factor"
+			]
+		},
+		"DoorDefinition": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"height": {
+					"description": "Vertical height of each door. In drawing units.",
+					"type": "number",
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 6.67,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"width": {
+					"description": "Horizontal width of each door. In drawing units.",
+					"type": "number",
+					"minimum": 0,
+					"exclusiveMinimum": true,
+					"default": 3,
+					"si_units": "m",
+					"ip_units": "ft"
+				},
+				"door_type": {
+					"type": "string",
+					"enum": [
+						"Door",
+						"Glass Door",
+						"Overhead Door"
+					],
+					"default": "Door"
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"height",
+				"width",
+				"door_type"
+			]
+		},
+		"DaylightingControlDefinition": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"illuminance_setpoint": {
+					"description": "Setpoint for daylighting control.",
+					"type": "number",
+					"default": 300,
+					"si_units": "lux",
+					"ip_units": "fc"
+				},
+				"height": {
+					"description": "Vertical distance of sensor above floor.  In drawing units.",
+					"type": "number",
+					"default": 3,
+					"si_units": "m",
+					"ip_units": "ft"
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"illuminance_setpoint",
+				"height"
+			]
+		},
+		"PitchedRoof": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "string"
+				},
+				"name": {
+					"type": [
+						"string",
+						"null"
+					]
+				},
+				"pitched_roof_type": {
+					"type": "string",
+					"enum": [
+						"Gable",
+						"Hip",
+						"Shed"
+					],
+					"default": "Gable"
+				},
+				"pitch": {
+					"description": "Pitch of roof. A value of 6, for example, implies a 6 in 12 pitch (or 26.57 degrees).",
+					"type": "number",
+					"minimum": 0,
+					"default": 6
+				},
+				"shed_direction": {
+					"description": "Direction of shed roof, from low edge to high edge, in clockwise degrees from the positive y-axis when viewed from above.",
+					"type": [
+						"number",
+						"null"
+					],
+					"default": 0,
+					"si_units": "deg",
+					"ip_units": "deg"
+				},
+				"color": {
+					"$ref": "#/definitions/HexColor"
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"pitched_roof_type",
+				"pitch",
+				"shed_direction",
+				"color"
+			]
+		},
+		"HexColor": {
+			"type": [
+				"string",
+				"null"
+			],
+			"pattern": "^#[a-fA-F0-9]{6}$"
+		}
+	}
+}
