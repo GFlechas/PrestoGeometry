@@ -38,3 +38,14 @@ frontend/dist/
 frontend/.vite/
 presto_geometry/web/static/assets/
 presto_geometry/web/static/index.html
+
+# AI tool outputs — each developer keeps their own local session state
+# .claude/          project-level Claude Code settings & session data
+# CLAUDE.md is intentionally NOT ignored — it's shared project documentation
+.claude/
+.mcp.json
+
+# Executed notebooks — cells run locally produce large embedded image outputs
+# that create noisy diffs and merge conflicts; commit only the clean source
+notebooks/*_executed.ipynb
+notebooks/*_executed_*.ipynb
