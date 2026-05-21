@@ -25,7 +25,9 @@ PHOTOS_ROOT     = REPO_ROOT / 'photos'
 ANN_ROOT        = REPO_ROOT / 'data' / 'annotations'
 OUT_ROOT        = REPO_ROOT / 'data' / 'outputs' / 'geometry'
 
-FLOORSPACE_WEB  = 'https://nrel.github.io/floorspace.js/'
+WEB_EDITOR_PORT = 5000
+WEB_EDITOR_URL  = f'http://127.0.0.1:{WEB_EDITOR_PORT}'
+WEB_STATIC_DIR  = REPO_ROOT / 'presto_geometry' / 'web' / 'static'
 
 # ---------------------------------------------------------------------------
 # Palette
@@ -69,6 +71,9 @@ class Launcher:
         self._ind_geom = None   # tk.Label for geometry indicator
         self._btn_assemble_frame = None
         self._btn_open_frame = None
+
+        # web editor server process (kept alive while launcher is open)
+        self._web_server_proc = None
 
         self._build_ui()
         self.root.update_idletasks()
@@ -229,21 +234,21 @@ class Launcher:
         row = tk.Frame(parent, bg=PANEL)
         row.pack(fill='x')
 
+        self._btn(row, 'Launch Web Editor',
+                  self._launch_web_editor, GRN).pack(side='left', padx=(0, 10))
+
         self._btn_open_frame = tk.Frame(row, bg=PANEL)
-        self._btn_open_frame.pack(side='left', padx=(0, 10))
+        self._btn_open_frame.pack(side='left')
 
         self._btn(self._btn_open_frame, 'Open Output Folder',
                   self._open_output_folder, '#4a3a1a').pack(side='left')
 
-        self._btn(row, 'Floorspace.js Web Editor ↗',
-                  lambda: webbrowser.open(FLOORSPACE_WEB), '#2a1a4a').pack(side='left')
-
         note = tk.Frame(parent, bg=PANEL)
         note.pack(fill='x', pady=(6, 0))
         tk.Label(note,
-                 text='The .json file in the output folder can be loaded into the\n'
-                      'Floorspace.js web editor (File → Import) for visual review,\n'
-                      'or passed directly to the IDF/OSM/HPXML export step.',
+                 text='Launch Web Editor starts a local server and opens the\n'
+                      'PrestoGeometry editor at http://127.0.0.1:5000 in your browser.\n'
+                      'Use it to refine the geometry and export to IDF / OSM / HPXML.',
                  fg=DIM, bg=PANEL,
                  font=('Helvetica', 8), justify='left', anchor='w').pack(fill='x')
 
@@ -376,6 +381,49 @@ class Launcher:
         except Exception as exc:
             messagebox.showerror('Launch failed',
                                  f'Could not start assembly tool:\n{exc}')
+
+    def _launch_web_editor(self):
+        # Check whether the frontend has been built
+        frontend_built = (WEB_STATIC_DIR / 'index.html').exists()
+
+        # If there's already a running server, just open the browser
+        if self._web_server_proc is not None and self._web_server_proc.poll() is None:
+            self._status_var.set(
+                f'Web editor already running — opening {WEB_EDITOR_URL}')
+            webbrowser.open(WEB_EDITOR_URL)
+            return
+
+        if not frontend_built:
+            answer = messagebox.askyesno(
+                'Frontend not built',
+                'The web editor frontend has not been built yet.\n\n'
+                'To build it, open a terminal in the frontend/ folder and run:\n'
+                '  npm install\n'
+                '  npm run build\n\n'
+                'The Flask server will still start, but will show a "bundle not built" '
+                'message in the browser.\n\n'
+                'Start the server anyway?',
+            )
+            if not answer:
+                return
+
+        cmd = [PYTHON_EXE, '-m', 'presto_geometry.web']
+        try:
+            self._web_server_proc = subprocess.Popen(
+                cmd,
+                cwd=str(REPO_ROOT),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception as exc:
+            messagebox.showerror('Launch failed',
+                                 f'Could not start the web server:\n{exc}')
+            return
+
+        self._status_var.set(
+            f'Web server starting — opening {WEB_EDITOR_URL} in a moment…')
+        # Give Flask ~1.5 s to bind the port before opening the browser
+        self.root.after(1500, lambda: webbrowser.open(WEB_EDITOR_URL))
 
     def _open_output_folder(self):
         name = self._building_name.get().strip()
