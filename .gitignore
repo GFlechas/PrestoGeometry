@@ -35,11 +35,13 @@ data/floorplans/
 _env.bat
 
 # Frontend build artefacts
+# node_modules and intermediate Vite cache are excluded — they're large and reproducible.
+# The compiled output in presto_geometry/web/static/ IS committed so that end users
+# don't need Node.js installed.  Build once with:
+#   cd frontend && npm install && npm run build
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
-presto_geometry/web/static/assets/
-presto_geometry/web/static/index.html
 
 # AI tool outputs — each developer keeps their own local session state
 # .claude/          project-level Claude Code settings & session data
