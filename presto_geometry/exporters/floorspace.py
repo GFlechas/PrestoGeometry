@@ -148,11 +148,11 @@ def building_to_floorspace_dict(b: Building, *, validate: bool = True) -> Dict[s
         "stories": [_story_to_dict(s) for s in b.stories],
         "building_units": [],
         "thermal_zones": [
-            {"id": tz.id, "name": tz.name or tz.id, "color": tz.color or "#88aadd"}
+            {"id": tz.id, "handle": None, "name": tz.name or tz.id, "color": tz.color or "#88aadd"}
             for tz in b.thermal_zones
         ],
         "space_types": [
-            {"id": st.id, "name": st.name or st.id, "color": st.color or "#dddddd"}
+            {"id": st.id, "handle": None, "name": st.name or st.id, "color": st.color or "#dddddd"}
             for st in b.space_types
         ],
         "construction_sets": [],
