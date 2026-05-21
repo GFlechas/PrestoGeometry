@@ -61,8 +61,6 @@ class Launcher:
 
         self._photos_dir    = tk.StringVar()
         self._building_name = tk.StringVar()
-        self._n_floors      = tk.IntVar(value=5)
-        self._floor_h       = tk.DoubleVar(value=3.4)
         self._n_faces       = tk.IntVar(value=4)
         self._status_var    = tk.StringVar(value='Select a photos folder to begin.')
 
@@ -216,23 +214,6 @@ class Launcher:
         self._btn(row, 'Open Annotation Tool', self._launch_annotate, GRN).pack(side='left')
 
     def _build_step3_body(self, parent):
-        # Settings row
-        settings = tk.Frame(parent, bg=PANEL)
-        settings.pack(fill='x', pady=(0, 6))
-        for lbl, var, lo, hi, inc, w in [
-            ('Floors:', self._n_floors, 1, 50, 1,   3),
-            ('Floor height (m):', self._floor_h, 1.0, 20.0, 0.1, 4),
-        ]:
-            tk.Label(settings, text=lbl, fg=DIM, bg=PANEL,
-                     font=('Helvetica', 9)).pack(side='left')
-            tk.Spinbox(settings, textvariable=var,
-                       from_=lo, to=hi, increment=inc, width=w,
-                       bg='#0d1b2e', fg=TEXT, buttonbackground=PANEL,
-                       relief='flat', font=('Consolas', 9)).pack(side='left', padx=(4, 14))
-        tk.Label(settings,
-                 text='(used for initial width estimates from photos)',
-                 fg=DIM, bg=PANEL, font=('Helvetica', 8)).pack(side='left')
-
         # Status indicator + button
         row = tk.Frame(parent, bg=PANEL)
         row.pack(fill='x')
@@ -373,11 +354,8 @@ class Launcher:
                 'complete Step 2 first.')
             return
 
-        name    = self._building_name.get().strip()
-        floors  = self._n_floors.get()
-        floor_h = self._floor_h.get()
-        cmd = [PYTHON_EXE, str(ASSEMBLE_SCRIPT),
-               name, '--floors', str(floors), '--floor-height', str(floor_h)]
+        name = self._building_name.get().strip()
+        cmd = [PYTHON_EXE, str(ASSEMBLE_SCRIPT), name]
         self._status_var.set(f'Opened assembly tool for "{name}" — see the new window.')
         subprocess.Popen(cmd, cwd=str(REPO_ROOT))
 

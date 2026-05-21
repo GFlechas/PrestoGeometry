@@ -178,8 +178,8 @@ Annotations are saved automatically after every segment to
 
 ### Step 3 — Assemble and save geometry
 
-Set the number of floors and floor height (used to estimate face widths),
-then click **Open Assembly Tool**.
+Click **Open Assembly Tool**. Face widths are estimated automatically from
+the photo annotations.
 
 The assembly window shows a **floor plan** on the left and a **3-D view** on
 the right.  Face widths are estimated from the photo annotations.
@@ -219,9 +219,10 @@ Click any corner circle on the floor plan to cycle through four modes:
 
 #### Recommended workflow
 
-1. **Review the width estimates.**  Long faces photographed at steep angles
-   are often underestimated.  If you know any dimensions (Google Earth,
-   blueprints, laser measure), enter them and mark them **Fixed**.
+1. **Review the width estimates.**  These are derived from the photo aspect
+   ratios.  Long faces photographed at steep oblique angles are often
+   underestimated.  If you know any face widths (Google Earth, blueprints,
+   laser measure), type them into the text boxes and mark them **Fixed**.
 2. **Mark non-rectangular corners as Free.**  For a rectangular building all
    corners can stay Fixed.  For an L-shape or angled corner, click the
    relevant corners to make them Free (yellow).
@@ -288,21 +289,19 @@ annotate.bat UnivStThomas_1loop
 ### Assembly tool
 
 ```
-assemble.bat [building_name] [--floors N] [--floor-height F] [--widths F0=W,...]
+assemble.bat [building_name] [--widths F0=W,...]
 ```
 
 | Argument | Default | Description |
 |---|---|---|
 | `building_name` | `UnivStThomas_1loop` | Must match the annotation file name |
-| `--floors N` | `5` | Number of floors (used for height estimate) |
-| `--floor-height F` | `3.4` | Floor-to-ceiling height in metres |
-| `--widths F0=13,...` | _(from photos)_ | Comma-separated width overrides |
+| `--widths F0=13,...` | _(estimated from photos)_ | Comma-separated width overrides in metres |
 
 **Examples:**
 
 ```bat
 assemble.bat
-assemble.bat MyBuilding --floors 3 --floor-height 4.0
+assemble.bat MyBuilding
 assemble.bat MyBuilding --widths F0=13,F1=47,F2=15,F3=40,F4=10
 ```
 

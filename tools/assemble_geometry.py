@@ -1363,9 +1363,6 @@ def main():
     parser = argparse.ArgumentParser(
         description='Assemble 3-D building geometry from annotations.')
     parser.add_argument('building', nargs='?', default='UnivStThomas_1loop')
-    parser.add_argument('--floors',        type=int,   default=DEFAULT_N_FLOORS)
-    parser.add_argument('--floor-height',  type=float, default=DEFAULT_FLOOR_H_M,
-                        dest='floor_height')
     parser.add_argument('--no-interactive', action='store_true',
                         help='Save static PNG without opening the editor')
     parser.add_argument('--widths', type=str, default='',
@@ -1375,15 +1372,13 @@ def main():
     args = parser.parse_args()
 
     building   = args.building
-    n_floors   = args.floors
-    floor_h_m  = args.floor_height
+    n_floors   = DEFAULT_N_FLOORS
+    floor_h_m  = DEFAULT_FLOOR_H_M
     output_dir = OUTPUT_DIR_BASE / building
 
     print(f"\n{'='*60}")
     print(f"  BUILDING GEOMETRY ASSEMBLY  -  {building}")
     print(f"{'='*60}")
-    print(f"  Floors       : {n_floors}")
-    print(f"  Floor height : {floor_h_m} m  ->  total {n_floors*floor_h_m:.1f} m")
 
     ann   = load_annotations(building)
     faces = collect_face_geometries(ann)

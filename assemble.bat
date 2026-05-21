@@ -7,12 +7,11 @@
 :: Run install.bat first if you have not set up the environment yet.
 ::
 :: Usage:
-::   assemble.bat [building_name] [--floors N] [--floor-height F] [--widths F0=13,F1=47,...]
+::   assemble.bat [building_name] [--widths F0=13,F1=47,...]
 ::
 :: Examples:
 ::   assemble.bat
 ::   assemble.bat MyBuilding
-::   assemble.bat MyBuilding --floors 5 --floor-height 3.4
 ::   assemble.bat MyBuilding --widths F0=13,F1=47,F2=15,F3=40,F4=10
 
 if not exist "%~dp0_env.bat" (
