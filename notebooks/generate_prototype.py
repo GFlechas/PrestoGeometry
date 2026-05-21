@@ -122,29 +122,30 @@ cells.append(code("""
 
 DEV_MODE       = True    # ← flip to False for full-resolution runs
 DEV_MAX_DIM    = 800     # longest edge in pixels when DEV_MODE is on
-DEV_MAX_IMAGES = 6       # cap sequence length (pick a spread: first + last + middle)
+DEV_MAX_IMAGES = 20      # cap sequence length (pick a spread: first + last + middle)
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 REPO_ROOT = Path('..').resolve()          # notebook lives one level below repo root
 
 PHOTO_DIRS = {
-    'UnivStThomas': REPO_ROOT / 'photos' / 'UnivStThomas',
-    'LoringPark':   REPO_ROOT / 'photos' / 'LoringPark',
+    'UnivStThomas':      REPO_ROOT / 'photos' / 'UnivStThomas',
+    'UnivStThomas_1loop': REPO_ROOT / 'photos' / 'UnivStThomas_1loop',
+    'LoringPark':        REPO_ROOT / 'photos' / 'LoringPark',
 }
 OUTPUT_DIR = REPO_ROOT / 'data' / 'outputs' / 'edge_detection'
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Change this to switch buildings
-ACTIVE_BUILDING = 'UnivStThomas'
+ACTIVE_BUILDING = 'UnivStThomas_1loop'
 
 # ── Line detection ─────────────────────────────────────────────────────────────
 # Base values are tuned for full resolution (~3000 px wide).
 # In DEV_MODE they scale down proportionally with the image.
 _BASE_WIDTH      = 3000
-CANNY_LOW        = 50
-CANNY_HIGH       = 150
+CANNY_LOW        = 60
+CANNY_HIGH       = 180
 HOUGH_THRESHOLD  = 50    # minimum Hough accumulator votes
-HOUGH_MIN_LEN    = 60    # px — minimum segment length to keep
+HOUGH_MIN_LEN    = 80    # px — minimum segment length to keep (base @ 3000px wide)
 HOUGH_MAX_GAP    = 15    # px — max in-segment gap to bridge during Hough
 VERT_TOL_DEG     = 12    # degrees from vertical
 HORIZ_TOL_DEG    = 15    # degrees from horizontal
@@ -166,16 +167,16 @@ DISTORTION_HEURISTIC: Dict[Tuple[int,int], float] = {
 }
 
 # ── Facade grouping ───────────────────────────────────────────────────────────
-VP_SHIFT_THRESHOLD  = 0.35  # normalised VP-x shift in smoothed trajectory → new facade
-VP_SMOOTH_WINDOW    = 3     # rolling-median window for VP trajectory smoothing
-VP_MIN_FACADE_IMGS  = 2     # merge any facade shorter than this into its neighbour
+VP_SHIFT_THRESHOLD  = 0.25  # normalised VP-x shift vs current facade median → new facade
+VP_SMOOTH_WINDOW    = 2     # rolling-median window for VP trajectory smoothing
+VP_MIN_FACADE_IMGS  = 1     # merge any facade shorter than this into its neighbour
 
 # ── Gap bridging (base values at _BASE_WIDTH; scaled at load time) ─────────────
 COLLINEAR_Y_TOL   = 10     # px: max y-distance between segments in same group
 BRIDGE_MAX_GAP_PX = 100    # px: max gap between collinear segments to bridge
 
 # ── Scale calibration ─────────────────────────────────────────────────────────
-FLOOR_HEIGHT_M_COMMERCIAL  = 3.5   # m — commercial / office
+FLOOR_HEIGHT_M_COMMERCIAL  = 3.4   # m — commercial / office (17m / 5 floors)
 FLOOR_HEIGHT_M_RESIDENTIAL = 2.7   # m — residential
 BUILDING_TYPE = 'commercial'       # 'commercial' | 'residential'
 
@@ -292,7 +293,7 @@ def load_image_sequence(building: str) -> List[ImageRecord]:
         scale_f  = actual_w / _BASE_WIDTH
         global HOUGH_MIN_LEN, HOUGH_MAX_GAP, HOUGH_THRESHOLD
         global COLLINEAR_Y_TOL, BRIDGE_MAX_GAP_PX
-        HOUGH_MIN_LEN     = max(20, int(60  * scale_f))
+        HOUGH_MIN_LEN     = max(25, int(80  * scale_f))
         HOUGH_MAX_GAP     = max(5,  int(15  * scale_f))
         HOUGH_THRESHOLD   = max(20, int(50  * scale_f))
         COLLINEAR_Y_TOL   = max(4,  int(10  * scale_f))
@@ -635,8 +636,13 @@ gradient and road surface.
 cells.append(code("""
 def make_sky_mask(img_bgr: np.ndarray) -> np.ndarray:
     \"\"\"
-    Return a boolean mask (True = sky pixel) based on HSV colour thresholds
-    plus a spatial prior that sky comes from the top of the image.
+    Return a boolean mask (True = sky pixel).
+
+    Strategy (two-stage):
+    1. HSV colour thresholds identify candidate sky pixels.
+    2. Connected-component labelling keeps only blobs that physically touch
+       the top row of the image.  This prevents white building walls from
+       being labelled as 'overcast sky' even when they pass the colour test.
     \"\"\"
     h, w = img_bgr.shape[:2]
     hsv  = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
@@ -647,24 +653,31 @@ def make_sky_mask(img_bgr: np.ndarray) -> np.ndarray:
         (hsv[:, :, 1] >  SKY_SAT_MIN) &
         (hsv[:, :, 2] >  SKY_VAL_MIN)
     )
-    # Overcast / white sky
-    white_sky = (
+    # Overcast / white sky — require pixel to be in the upper 55 % of the frame
+    # to reduce false positives on light-coloured building facades lower down.
+    white_sky_raw = (
         (hsv[:, :, 1] < OVERCAST_SAT_MAX) &
         (hsv[:, :, 2] > OVERCAST_VAL_MIN)
     )
+    white_sky = white_sky_raw.copy()
+    white_sky[int(h * 0.55):, :] = False   # never sky in the lower 45 %
+
     raw = (blue_sky | white_sky).astype(np.uint8)
 
-    # Spatial prior: grow sky downward from the top third only
-    top_seed = raw[:h // 3, :].copy()
-    kernel   = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (31, 31))
-    grown    = cv2.dilate(top_seed, kernel, iterations=3)
-    combined = (raw & np.pad(grown, ((0, h - h // 3), (0, 0)),
-                              mode='constant', constant_values=0))
+    # Morphological closing to fill small holes and join nearby fragments
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+    raw    = cv2.morphologyEx(raw, cv2.MORPH_CLOSE, kernel)
 
-    # Fill holes and smooth boundary
-    kernel2  = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
-    combined = cv2.morphologyEx(combined, cv2.MORPH_CLOSE, kernel2)
-    return combined.astype(bool)
+    # Keep only connected components that touch the top image row.
+    # This is the key step: a white wall in the middle of the frame will
+    # form its own isolated component and be discarded.
+    n_labels, labels = cv2.connectedComponents(raw, connectivity=8)
+    top_labels = set(labels[0, :].tolist()) - {0}   # labels in row-0
+    final = np.zeros_like(raw)
+    for lbl in top_labels:
+        final[labels == lbl] = 1
+
+    return final.astype(bool)
 
 
 def make_ground_mask(img_bgr: np.ndarray) -> np.ndarray:
@@ -759,17 +772,31 @@ def extract_line_segments(rec: ImageRecord) -> np.ndarray:
     \"\"\"
     Return N×5 float32 array [x1, y1, x2, y2, class_id].
     Returns empty (0, 5) array if nothing found.
+
+    Pre-processing:
+    - Bilateral filter preserves sharp structural edges while smoothing
+      repetitive textures (brick, foliage, asphalt).
+    - Sky AND ground pixels are zeroed before Canny so those regions
+      contribute no edges.
+
+    Post-processing:
+    - Any segment whose midpoint falls in the sky or ground mask is dropped.
     \"\"\"
     img = rec.undistorted
     h, w = img.shape[:2]
 
-    gray    = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Suppress sky before edge detection
-    masked = blurred.copy()
+    # Bilateral filter: preserves architectural edges, suppresses brick/leaf texture.
+    # d=9, sigmaColor=75, sigmaSpace=75 is the standard starting point.
+    smooth = cv2.bilateralFilter(gray, d=9, sigmaColor=75, sigmaSpace=75)
+
+    # Suppress sky and ground before edge detection
+    masked = smooth.copy()
+    ground_mask = make_ground_mask(img)
     if rec.sky_mask is not None:
         masked[rec.sky_mask] = 0
+    masked[ground_mask] = 0
 
     edges = cv2.Canny(masked, CANNY_LOW, CANNY_HIGH)
 
@@ -797,6 +824,14 @@ def extract_line_segments(rec: ImageRecord) -> np.ndarray:
 
         length = np.hypot(x2 - x1, y2 - y1)
         if length < HOUGH_MIN_LEN:
+            continue
+
+        # Post-filter: drop segments whose midpoint is in sky or ground
+        mx = int(np.clip((x1 + x2) / 2, 0, w - 1))
+        my = int(np.clip((y1 + y2) / 2, 0, h - 1))
+        if rec.sky_mask is not None and rec.sky_mask[my, mx]:
+            continue
+        if ground_mask[my, mx]:
             continue
 
         out.append([float(x1), float(y1), float(x2), float(y2), float(class_id)])
@@ -990,11 +1025,14 @@ def group_by_facade(records: List[ImageRecord]) -> List[int]:
     Assign a facade id (0, 1, 2, …) to each image based on VP consistency.
 
     Steps:
-      1. Normalise VP x to [0, 1] relative to frame width.
-      2. Smooth the trajectory with a rolling median to suppress per-frame noise
-         and the mid-sequence lens switch.
-      3. Trigger a new facade only when the smoothed shift exceeds VP_SHIFT_THRESHOLD.
-      4. Merge any facade shorter than VP_MIN_FACADE_IMGS into its left neighbour.
+      1. Normalise VP x relative to frame width.
+      2. Causal (one-sided) rolling-median smooth — only past frames, so a
+         VP spike at image k cannot bleed backward and mask the transition
+         between images k-1 and k.
+      3. Compare each image against the running median of the CURRENT facade
+         so far, not just the previous frame.  This makes detection robust
+         to a single noisy image that would otherwise anchor the threshold.
+      4. Merge any facade shorter than VP_MIN_FACADE_IMGS into its neighbour.
     \"\"\"
     def norm_vp(rec):
         if rec.vp is None:
@@ -1003,11 +1041,10 @@ def group_by_facade(records: List[ImageRecord]) -> List[int]:
 
     raw_vps = [norm_vp(r) for r in records]
 
-    # ── Step 1: fill None gaps with nearest neighbour so smoothing works ───────
+    # ── Step 1: fill None gaps (forward then backward) ────────────────────────
     filled = list(raw_vps)
     for i, v in enumerate(filled):
         if v is None:
-            # look ahead for next valid value
             for j in range(i + 1, len(filled)):
                 if filled[j] is not None:
                     filled[i] = filled[j]
@@ -1015,27 +1052,32 @@ def group_by_facade(records: List[ImageRecord]) -> List[int]:
             if filled[i] is None and i > 0:
                 filled[i] = filled[i - 1]
 
-    # ── Step 2: rolling-median smooth ─────────────────────────────────────────
-    half  = VP_SMOOTH_WINDOW // 2
+    # ── Step 2: causal rolling-median (past VP_SMOOTH_WINDOW frames only) ─────
     smoothed = []
     for i in range(len(filled)):
-        window = [filled[j] for j in range(max(0, i - half),
-                                            min(len(filled), i + half + 1))
+        window = [filled[j] for j in range(max(0, i - VP_SMOOTH_WINDOW + 1), i + 1)
                   if filled[j] is not None]
         smoothed.append(float(np.median(window)) if window else 0.0)
 
-    # ── Step 3: threshold on smoothed shifts ──────────────────────────────────
-    facade_ids = [0] * len(records)
-    current    = 0
+    # ── Step 3: compare each image to the running facade median ───────────────
+    facade_ids  = [0] * len(records)
+    current     = 0
+    facade_vps  = [smoothed[0]]   # smoothed VPs assigned to the current facade
+
     for i in range(1, len(records)):
-        facade_ids[i] = current
-        shift     = abs(smoothed[i] - smoothed[i - 1])
-        sign_flip = (smoothed[i] * smoothed[i - 1] < 0) and shift > 0.45
+        facade_median = float(np.median(facade_vps))
+        shift         = abs(smoothed[i] - facade_median)
+        sign_flip     = (smoothed[i] * facade_median < 0) and shift > 0.45
+
         if shift > VP_SHIFT_THRESHOLD or sign_flip:
             current += 1
-            facade_ids[i] = current
+            facade_vps = [smoothed[i]]      # reset running median for new facade
             print(f"  Corner after image {i-1}  ({records[i-1].path.name})  "
-                  f"smoothed shift={shift:.3f}  sign_flip={sign_flip}")
+                  f"shift vs facade median={shift:.3f}  sign_flip={sign_flip}")
+        else:
+            facade_vps.append(smoothed[i])
+
+        facade_ids[i] = current
 
     # ── Step 4: merge short facades into left neighbour ───────────────────────
     changed = True
@@ -1045,9 +1087,8 @@ def group_by_facade(records: List[ImageRecord]) -> List[int]:
         for f, cnt in sorted(counts.items()):
             if cnt < VP_MIN_FACADE_IMGS and f > 0:
                 facade_ids = [f - 1 if v == f else v for v in facade_ids]
-                # Re-number to keep ids contiguous
-                uniq   = sorted(set(facade_ids))
-                remap  = {old: new for new, old in enumerate(uniq)}
+                uniq  = sorted(set(facade_ids))
+                remap = {old: new for new, old in enumerate(uniq)}
                 facade_ids = [remap[v] for v in facade_ids]
                 changed = True
                 break
@@ -1464,10 +1505,16 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 def rectify_facade_image(img_bgr: np.ndarray,
                           vp: Tuple[float, float],
-                          K: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+                          K: np.ndarray,
+                          max_rotation_deg: float = 30.0) -> Tuple[np.ndarray, np.ndarray]:
     \"\"\"
     Compute a rectifying homography H = K R K^{-1} from the VP and return
-    (rectified_image, H).  Falls back to identity if K is degenerate.
+    (rectified_image, H).
+
+    Falls back to (identity, I) when:
+    - K is degenerate
+    - The implied rotation angle exceeds max_rotation_deg (extreme oblique view
+      would push the facade off-screen entirely)
     \"\"\"
     h, w = img_bgr.shape[:2]
     try:
@@ -1492,6 +1539,15 @@ def rectify_facade_image(img_bgr: np.ndarray,
 
     # Rotation: columns = right, up, normal
     R = np.column_stack([right_3d, up_3d, normal_3d])
+
+    # Guard: if the rotation angle is too large the warp will push the
+    # building entirely off-screen.  Fall back to identity.
+    cos_angle = np.clip((np.trace(R) - 1.0) / 2.0, -1.0, 1.0)
+    rotation_deg = np.degrees(np.arccos(cos_angle))
+    if rotation_deg > max_rotation_deg:
+        print(f"    rectify: rotation {rotation_deg:.1f}° > {max_rotation_deg}° — using identity")
+        return img_bgr.copy(), np.eye(3)
+
     H = K @ R @ K_inv
 
     rectified = cv2.warpPerspective(img_bgr, H, (w, h),
@@ -1500,15 +1556,26 @@ def rectify_facade_image(img_bgr: np.ndarray,
     return rectified, H
 
 
-# ── Pick best image per facade (most horizontal segments, has a VP) ───────────
+# ── Pick best image per facade ────────────────────────────────────────────────
+# Prefer the image that is most face-on to the facade: its VP should be
+# furthest from the principal point (small convergence = nearly orthographic).
+# A VP close to the image centre means a sharp viewing angle → large,
+# distorting homography that pushes facade pixels off-screen.
 def best_record_for_facade(records: List[ImageRecord], facade_id: int) -> Optional[ImageRecord]:
     fr = [r for r in records if r.facade_id == facade_id and r.vp is not None]
     if not fr:
         fr = [r for r in records if r.facade_id == facade_id]
     if not fr:
         return None
-    return max(fr, key=lambda r: int(np.sum(r.line_segments[:, 4] == 0))
-               if len(r.line_segments) else 0)
+
+    def face_on_score(r: ImageRecord) -> float:
+        if r.vp is None or r.lens_profile is None:
+            return 0.0
+        cx = r.lens_profile.image_width  / 2.0
+        cy = r.lens_profile.image_height / 2.0
+        return float(np.hypot(r.vp[0] - cx, r.vp[1] - cy))
+
+    return max(fr, key=face_on_score)
 
 
 facade_best   = {f: best_record_for_facade(records, f) for f in range(n_facades)}
@@ -1947,7 +2014,7 @@ if walls:
 # Axes formatting
 all_verts = np.vstack([w.verts for w in walls])
 xs, ys, zs = all_verts[:,0], all_verts[:,1], all_verts[:,2]
-margin = max(all_verts.ptp(axis=0)[:2]) * 0.15
+margin = max(all_verts.max(axis=0)[:2] - all_verts.min(axis=0)[:2]) * 0.15
 ax3d.set_xlim(xs.min() - margin, xs.max() + margin)
 ax3d.set_ylim(ys.min() - margin, ys.max() + margin)
 ax3d.set_zlim(0, zs.max() * 1.2)
@@ -1963,159 +2030,47 @@ plt.savefig(OUTPUT_DIR / f'{ACTIVE_BUILDING}_12_3d_geometry.png', bbox_inches='t
 plt.show()
 """))
 
-# ── 16: Stage 11 — Populate Building model ────────────────────────────────────
+# ── 16: Stage 11 — Geometry summary (Building model export deferred) ──────────
 cells.append(md("""
 ---
-## Stage 11 — Populate the Building Data Model
+## Stage 11 — Geometry Summary
 
-Translate the assembled 3-D geometry into a `Building` object that follows the
-**floorspace.js** schema (`presto_geometry/models/building.py`).
-
-Each detected facade becomes:
-- A `Story` per floor (sharing the same `Geometry`)
-- A `Space` per story occupying the full floor-plan face
-- `WindowPlacement` entries on the wall edges
-
-This object is the handoff point to the IDF, OSM, and HPXML exporters.
+Print the detected geometry in a structured form.  Export to the `Building`
+data model (`presto_geometry/models/building.py`) and then to IDF / OSM / HPXML
+is a **later step** — this stage just verifies the numbers are sensible before
+that handoff.
 """))
 
 cells.append(code("""
-import sys
-sys.path.insert(0, str(REPO_ROOT))
+# ── Geometry summary ──────────────────────────────────────────────────────────
+# Building model export (presto_geometry/models/building.py) is a later step.
+# For now just confirm the numbers we'd hand off.
 
-from presto_geometry.models.building import (
-    Building, Story, Space, Geometry,
-    Vertex, Edge, Face,
-    ThermalZone, WindowDefinition, WindowPlacement,
-)
+fh_m = (FLOOR_HEIGHT_M_COMMERCIAL if BUILDING_TYPE == 'commercial'
+        else FLOOR_HEIGHT_M_RESIDENTIAL)
 
+print(f"{'='*54}")
+print(f"  Geometry summary — {ACTIVE_BUILDING}")
+print(f"{'='*54}")
+print(f"  Facades (walls) : {len(walls)}")
+print(f"  Building type   : {BUILDING_TYPE}  ({fh_m} m / floor)")
+print()
+for w in walls:
+    wins = w.windows
+    print(f"  Wall  F{w.facade_id} :  {w.width_m:.1f} m wide  x  {w.height_m:.1f} m tall"
+          f"   ({w.n_floors} floor{'s' if w.n_floors != 1 else ''})  "
+          f"windows={len(wins)}")
 
-def walls_to_building(walls: List[Wall3D], building_name: str = None) -> Building:
-    \"\"\"
-    Convert the 3-D wall list into a floorspace.js-aligned Building object.
-    One Story per detected floor, one Space per story, geometry from footprint.
-    \"\"\"
-    name = building_name or ACTIVE_BUILDING
+print()
+print(f"  Footprint ({len(footprint_poly)-1} vertices):")
+for i, pt in enumerate(footprint_poly[:-1]):
+    print(f"    [{i}]  ({pt[0]:.2f}, {pt[1]:.2f}) m")
 
-    # ── Shared geometry: 2-D floor plan ──────────────────────────────────────
-    # Vertices = floor plan corners (one per wall start-point)
-    vertices, edges, faces = [], [], []
-    vmap: Dict[str, int] = {}   # vertex_id → index
-
-    floor_pts = [tuple(w.verts[0, :2].round(3)) for w in walls]   # (x, y) metres
-
-    for i, (x, y) in enumerate(floor_pts):
-        vid = f"v-{i}"
-        vertices.append(Vertex(id=vid, x=float(x), y=float(y)))
-        vmap[vid] = i
-
-    # Edges: connect consecutive vertices (closed polygon)
-    face_edge_ids = []
-    n_pts = len(floor_pts)
-    for i in range(n_pts):
-        eid = f"e-{i}"
-        v_start = f"v-{i}"
-        v_end   = f"v-{(i + 1) % n_pts}"
-        edges.append(Edge(id=eid, vertex_ids=(v_start, v_end), face_ids=["f-0"]))
-        face_edge_ids.append(eid)
-        # Back-fill edge_ids on vertices
-        vertices[i].edge_ids.append(eid)
-        vertices[(i + 1) % n_pts].edge_ids.append(eid)
-
-    face = Face(id="f-0", edge_ids=face_edge_ids,
-                edge_order=[0] * len(face_edge_ids))
-    geom = Geometry(id="g-0", vertices=vertices, edges=edges, faces=[face])
-
-    # ── Thermal zones: one per detected facade ────────────────────────────────
-    thermal_zones = [ThermalZone(id=f"tz-{w.facade_id}",
-                                  name=f"Zone_Facade_{w.facade_id}")
-                     for w in walls]
-
-    # ── Window definitions ─────────────────────────────────────────────────────
-    if walls and walls[0].windows:
-        sample_win = walls[0].windows[0]
-        # Convert pixel dimensions to metres using facade scale
-        outline = facade_outlines[walls[0].facade_id]
-        m_per_px = outline.real_height_m / outline.pixel_height
-        win_w_m  = round(sample_win['w'] * m_per_px, 2)
-        win_h_m  = round(sample_win['h'] * m_per_px, 2)
-    else:
-        win_w_m, win_h_m = 1.2, 1.0   # sensible defaults
-
-    window_defs = [WindowDefinition(
-        id="wd-0", name="Detected Window",
-        width=win_w_m, height=win_h_m, sill_height=0.9,
-    )]
-
-    # ── Stories: one per floor ────────────────────────────────────────────────
-    n_floors_max = max((w.n_floors for w in walls), default=1)
-    fh_m = (FLOOR_HEIGHT_M_COMMERCIAL if BUILDING_TYPE == 'commercial'
-            else FLOOR_HEIGHT_M_RESIDENTIAL)
-    stories = []
-    for fl in range(n_floors_max):
-        story_id = f"st-{fl}"
-        spaces   = []
-        for w in walls:
-            if fl < w.n_floors:
-                sp = Space(
-                    id=f"sp-{fl}-{w.facade_id}",
-                    name=f"Floor_{fl}_Facade_{w.facade_id}",
-                    face_id="f-0",
-                    thermal_zone_id=f"tz-{w.facade_id}",
-                    floor_to_ceiling_height=fh_m,
-                )
-                spaces.append(sp)
-
-        # Window placements on wall edges for this floor
-        win_placements = []
-        for w in walls:
-            edge_id = f"e-{w.facade_id}"
-            for win in w.windows:
-                # alpha = centre x of window / facade pixel width
-                alpha = float(np.clip(
-                    (win['x'] + win['w'] / 2) / max(facade_outlines[w.facade_id].pixel_width, 1),
-                    0.05, 0.95
-                ))
-                win_placements.append(WindowPlacement(
-                    window_definition_id="wd-0",
-                    edge_id=edge_id,
-                    alpha=alpha,
-                ))
-
-        stories.append(Story(
-            id=story_id,
-            name=f"Floor_{fl}",
-            floor_to_ceiling_height=fh_m,
-            geometry=geom,
-            spaces=spaces,
-            windows=win_placements,
-        ))
-
-    building = Building(
-        name=name,
-        footprint=[tuple(pt) for pt in footprint_poly[:-1]],
-        num_floors=n_floors_max,
-        zones=thermal_zones,
-        stories=stories,
-        source_images=[str(r.path) for r in records],
-    )
-    return building
-
-
-building = walls_to_building(walls)
-
-print(f"Building: {building.name}")
-print(f"  num_floors : {building.num_floors}")
-print(f"  stories    : {len(building.stories)}")
-print(f"  zones      : {len(building.zones)}")
-print(f"  footprint  : {len(building.footprint)} vertices")
-total_spaces  = sum(len(s.spaces)  for s in building.stories)
-total_windows = sum(len(s.windows) for s in building.stories)
-print(f"  spaces     : {total_spaces}")
-print(f"  windows    : {total_windows}")
-print(f"\\nFootprint coords (x, y) metres:")
-for i, pt in enumerate(building.footprint):
-    print(f"  [{i}] ({pt[0]:.2f}, {pt[1]:.2f})")
+total_wins = sum(len(w.windows) for w in walls)
+print()
+print(f"  Total window candidates : {total_wins}")
+print()
+print("  (Building model export → deferred to a later stage)")
 """))
 
 # ── 17: Summary (updated) ─────────────────────────────────────────────────────
@@ -2143,12 +2098,6 @@ for f, outline in facade_outlines.items():
     print(f"  Facade {f}: {outline.real_width_m:.1f} m wide  x  "
           f"{outline.real_height_m:.1f} m tall  ({outline.n_floors} floors)")
 
-print(f"\\nBuilding model:")
-print(f"  stories  : {len(building.stories)}")
-print(f"  zones    : {len(building.zones)}")
-print(f"  windows  : {sum(len(s.windows) for s in building.stories)}")
-print(f"  footprint: {len(building.footprint)} pts")
-
 print(f"\\nOutputs saved to: {OUTPUT_DIR}")
 out_files = sorted(OUTPUT_DIR.glob(f'{ACTIVE_BUILDING}_*.png'))
 for f in out_files:
@@ -2167,7 +2116,7 @@ Next steps
   [x] Facade rectification (K R K^-1)
   [x] Building outline + scale calibration
   [x] 3-D footprint + wall assembly
-  [x] Building data model population
+  [ ] Building data model population (deferred — building.py not final yet)
   [ ] Cross-image line aggregation in rectified coords
   [ ] Corner-angle estimation from VP pairs (non-rectangular buildings)
   [ ] Rooftop geometry (pitched roofs from Loring Park)
