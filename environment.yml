@@ -1,0 +1,30 @@
+# Conda environment for PrestoGeometry
+# ──────────────────────────────────────
+# Create:  conda env create -f environment.yml
+# Update:  conda env update -f environment.yml --prune
+# Activate: conda activate presto_geometry
+
+name: presto_geometry
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.11
+  - numpy>=1.26
+  - scipy>=1.11
+  - matplotlib>=3.8
+  - scikit-learn>=1.3
+  - pip
+
+  # Packages installed via pip (no conda equivalent or better via pip)
+  - pip:
+    - opencv-python>=4.9
+    - Pillow>=10.0
+    - shapely>=2.0
+    - eppy>=0.5.63
+    - lxml>=5.0
+    - click>=8.1
+    - flask>=3.0
+    - jsonschema>=4.23

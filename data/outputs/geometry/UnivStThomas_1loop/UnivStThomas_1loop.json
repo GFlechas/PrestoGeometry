@@ -1,0 +1,221 @@
+{
+  "version": "0.7.0",
+  "application": {},
+  "project": {
+    "config": {
+      "units": "si",
+      "language": "EN-US"
+    },
+    "north_axis": 0.0,
+    "ground": {
+      "floor_offset": 0,
+      "azimuth_angle": 0,
+      "tilt_slope": 0
+    },
+    "grid": {
+      "visible": true,
+      "spacing": 0.5
+    },
+    "view": {
+      "min_x": -50,
+      "min_y": -50,
+      "max_x": 50,
+      "max_y": 50
+    },
+    "map": {
+      "visible": false,
+      "latitude": 39.7653,
+      "longitude": -104.9863,
+      "zoom": 4.5,
+      "elevation": 0,
+      "enabled": false,
+      "initialized": false,
+      "rotation": 0
+    },
+    "previous_story": {
+      "visible": true
+    },
+    "show_import_export": true
+  },
+  "stories": [
+    {
+      "id": "story-1",
+      "handle": null,
+      "name": "Floor 1",
+      "image_visible": true,
+      "below_floor_plenum_height": 0.0,
+      "floor_to_ceiling_height": 17.0,
+      "above_ceiling_plenum_height": 0.0,
+      "multiplier": 1,
+      "color": "#D4E8C2",
+      "geometry": {
+        "id": "geom-s1",
+        "vertices": [
+          {
+            "id": "v-s1-0",
+            "x": 0.0,
+            "y": 0.0,
+            "edge_ids": [
+              "e-s1-4",
+              "e-s1-0"
+            ]
+          },
+          {
+            "id": "v-s1-1",
+            "x": 13.0,
+            "y": 0.0,
+            "edge_ids": [
+              "e-s1-0",
+              "e-s1-1"
+            ]
+          },
+          {
+            "id": "v-s1-2",
+            "x": 14.262068156673779,
+            "y": -46.983052092939964,
+            "edge_ids": [
+              "e-s1-1",
+              "e-s1-2"
+            ]
+          },
+          {
+            "id": "v-s1-3",
+            "x": -3.0238571027789742,
+            "y": -47.44739007986858,
+            "edge_ids": [
+              "e-s1-2",
+              "e-s1-3"
+            ]
+          },
+          {
+            "id": "v-s1-4",
+            "x": -4.008713770413253,
+            "y": -10.784099056434002,
+            "edge_ids": [
+              "e-s1-3",
+              "e-s1-4"
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "id": "e-s1-0",
+            "vertex_ids": [
+              "v-s1-0",
+              "v-s1-1"
+            ],
+            "face_ids": [
+              "f-s1-1"
+            ]
+          },
+          {
+            "id": "e-s1-1",
+            "vertex_ids": [
+              "v-s1-1",
+              "v-s1-2"
+            ],
+            "face_ids": [
+              "f-s1-1"
+            ]
+          },
+          {
+            "id": "e-s1-2",
+            "vertex_ids": [
+              "v-s1-2",
+              "v-s1-3"
+            ],
+            "face_ids": [
+              "f-s1-1"
+            ]
+          },
+          {
+            "id": "e-s1-3",
+            "vertex_ids": [
+              "v-s1-3",
+              "v-s1-4"
+            ],
+            "face_ids": [
+              "f-s1-1"
+            ]
+          },
+          {
+            "id": "e-s1-4",
+            "vertex_ids": [
+              "v-s1-4",
+              "v-s1-0"
+            ],
+            "face_ids": [
+              "f-s1-1"
+            ]
+          }
+        ],
+        "faces": [
+          {
+            "id": "f-s1-1",
+            "edge_ids": [
+              "e-s1-0",
+              "e-s1-1",
+              "e-s1-2",
+              "e-s1-3",
+              "e-s1-4"
+            ],
+            "edge_order": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "images": [],
+      "spaces": [
+        {
+          "id": "space-s1-1",
+          "handle": null,
+          "name": "Ground Floor Space",
+          "face_id": "f-s1-1",
+          "building_unit_id": null,
+          "thermal_zone_id": "tz-default",
+          "space_type_id": "stype-default",
+          "construction_set_id": null,
+          "pitched_roof_id": null,
+          "daylighting_controls": [],
+          "below_floor_plenum_height": null,
+          "floor_to_ceiling_height": null,
+          "above_ceiling_plenum_height": null,
+          "floor_offset": null,
+          "open_to_below": false,
+          "building_type_id": null,
+          "template": null
+        }
+      ],
+      "shading": [],
+      "windows": [],
+      "doors": []
+    }
+  ],
+  "building_units": [],
+  "thermal_zones": [
+    {
+      "id": "tz-default",
+      "handle": null,
+      "name": "Default Zone",
+      "color": "#88aadd"
+    }
+  ],
+  "space_types": [
+    {
+      "id": "stype-default",
+      "handle": null,
+      "name": "Default Space Type",
+      "color": "#dddddd"
+    }
+  ],
+  "construction_sets": [],
+  "window_definitions": [],
+  "door_definitions": [],
+  "daylighting_control_definitions": [],
+  "pitched_roofs": []
+}

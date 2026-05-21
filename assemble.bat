@@ -1,14 +1,28 @@
 @echo off
-:: Assembles 3-D building geometry from face annotations and saves a PNG.
+:: PrestoGeometry — Assembly Tool
+::
+:: Launches the interactive geometry assembly and editor directly.
+:: For the guided workflow, use launch.bat instead.
+::
+:: Run install.bat first if you have not set up the environment yet.
 ::
 :: Usage:
-::   assemble.bat [building_name] [--floors N] [--floor-height F] [--widths F0=W,...]
+::   assemble.bat [building_name] [--floors N] [--floor-height F] [--widths F0=13,F1=47,...]
 ::
 :: Examples:
 ::   assemble.bat
-::   assemble.bat UnivStThomas_1loop
-::   assemble.bat UnivStThomas_1loop --floors 5 --floor-height 3.4
-::   assemble.bat UnivStThomas_1loop --widths F0=13,F1=47,F2=15,F3=40,F4=10
+::   assemble.bat MyBuilding
+::   assemble.bat MyBuilding --floors 5 --floor-height 3.4
+::   assemble.bat MyBuilding --widths F0=13,F1=47,F2=15,F3=40,F4=10
 
-call "C:\Users\gabri\miniconda3\Scripts\activate.bat" ai_agent
-python "%~dp0tools\assemble_geometry.py" %*
+if not exist "%~dp0_env.bat" (
+    echo.
+    echo  ERROR: _env.bat not found.
+    echo  Please run install.bat first to set up the Python environment.
+    echo.
+    pause
+    exit /b 1
+)
+
+call "%~dp0_env.bat"
+"%PRESTO_PYTHON%" "%~dp0tools\assemble_geometry.py" %*
