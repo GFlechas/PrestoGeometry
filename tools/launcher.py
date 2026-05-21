@@ -10,7 +10,7 @@ import sys
 import tkinter as tk
 import webbrowser
 from pathlib import Path
-from tkinter import filedialog, font as tkfont
+from tkinter import filedialog, font as tkfont, messagebox
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -317,47 +317,65 @@ class Launcher:
             self._building_name.set(p.name)
         self._status_var.set(f'Photos folder: {p}')
 
-    def _validate(self):
-        photos = self._photos_dir.get().strip()
-        name   = self._building_name.get().strip()
-        if not photos:
-            return False, 'Please select a photos folder (Step 1).'
-        if not Path(photos).exists():
-            return False, f'Photos folder not found: {photos}'
+    def _require_name(self):
+        """Return building name or show an error dialog and return None."""
+        name = self._building_name.get().strip()
         if not name:
-            return False, 'Please enter a building name (Step 1).'
-        return True, ''
+            messagebox.showerror(
+                'Building name required',
+                'Please enter a building name in Step 1 before continuing.')
+            return None
+        return name
 
     def _launch_annotate(self):
-        ok, msg = self._validate()
-        if not ok:
-            self._status_var.set(f'Cannot launch: {msg}')
+        name = self._require_name()
+        if name is None:
             return
+
         photos = self._photos_dir.get().strip()
-        name   = self._building_name.get().strip()
-        faces  = self._n_faces.get()
+        if not photos:
+            messagebox.showerror(
+                'Photos folder required',
+                'Please select a photos folder in Step 1 before annotating.')
+            return
+        if not Path(photos).exists():
+            messagebox.showerror(
+                'Folder not found',
+                f'Photos folder does not exist:\n{photos}')
+            return
+
+        faces = self._n_faces.get()
         cmd = [PYTHON_EXE, str(ANNOTATE_SCRIPT),
                name, '--photos-dir', photos, '--faces', str(faces)]
         self._status_var.set(f'Opened annotation tool for "{name}" — see the new window.')
-        subprocess.Popen(cmd, cwd=str(REPO_ROOT))
+        try:
+            subprocess.Popen(cmd, cwd=str(REPO_ROOT))
+        except Exception as exc:
+            messagebox.showerror('Launch failed',
+                                 f'Could not start annotation tool:\n{exc}')
 
     def _launch_assemble(self):
-        ok, msg = self._validate()
-        if not ok:
-            self._status_var.set(f'Cannot launch: {msg}')
+        name = self._require_name()
+        if name is None:
             return
 
         ann = self._ann_file()
         if ann is None or not ann.exists():
-            self._status_var.set(
-                f'No annotation file found for "{self._building_name.get().strip()}" — '
-                'complete Step 2 first.')
+            messagebox.showerror(
+                'No annotations found',
+                f'No annotation file found for "{name}".\n\n'
+                f'Complete Step 2 (Annotate) first, or check that the '
+                f'building name matches the one used during annotation.\n\n'
+                f'Expected file:\n{ANN_ROOT / name / (name + ".json")}')
             return
 
-        name = self._building_name.get().strip()
         cmd = [PYTHON_EXE, str(ASSEMBLE_SCRIPT), name]
         self._status_var.set(f'Opened assembly tool for "{name}" — see the new window.')
-        subprocess.Popen(cmd, cwd=str(REPO_ROOT))
+        try:
+            subprocess.Popen(cmd, cwd=str(REPO_ROOT))
+        except Exception as exc:
+            messagebox.showerror('Launch failed',
+                                 f'Could not start assembly tool:\n{exc}')
 
     def _open_output_folder(self):
         name = self._building_name.get().strip()
